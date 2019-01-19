@@ -8,6 +8,7 @@ ThisBuild / organizationName := "example"
 lazy val root = (project in file("."))
   .settings(
     name := "scala-sbt-helloworld",
+    libraryDependencies += "org.tensorflow" % "tensorflow" % "1.12.0",
     libraryDependencies += scalaTest % Test
   )
 
