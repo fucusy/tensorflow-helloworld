@@ -1,3 +1,4 @@
 *.swp
 */target/
+*/*/target
 java-pom-loadmodel/model_data/
