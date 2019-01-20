@@ -1,7 +1,6 @@
 import os
 import tensorflow as tf
 from tensorflow import keras
-
 (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
 
 train_labels = train_labels[:1000]
@@ -26,22 +25,17 @@ def create_model():
   return model
 
 
-# Create a basic model instance
-model = create_model()
-model.summary()
 
 checkpoint_path = "training_1/cp.ckpt"
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
-# Create checkpoint callback
-cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, 
-                                                 save_weights_only=True,
-                                                 verbose=1)
 
 model = create_model()
-saved_model_path = tf.contrib.saved_model.save_keras_model(model, "./withtrain_models")
 
-model.fit(train_images, train_labels,  epochs = 10, 
-          validation_data = (test_images,test_labels),
-          callbacks = [cp_callback])  # pass callback to training
-saved_model_path = tf.contrib.saved_model.save_keras_model(model, "./trained_models")
+loss, acc = model.evaluate(test_images, test_labels)
+print("Untrained model, accuracy: {:5.2f}%".format(100*acc))
+
+
+model.load_weights(checkpoint_path)
+loss,acc = model.evaluate(test_images, test_labels)
+print("Restored model, accuracy: {:5.2f}%".format(100*acc))

@@ -3,3 +3,10 @@
 */*/target
 java-pom-loadmodel/model_data/
 scala-sbt-loadmodel/model_data/
+
+
+export-in-python-import-in-scala/python/env/
+export-in-python-import-in-scala/python/trained_models/
+export-in-python-import-in-scala/python/training_1/
+export-in-python-import-in-scala/python/withtrain_models/
+export-in-python-import-in-scala/scala-sbt-loadmodel/project/target/
