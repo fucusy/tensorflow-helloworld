@@ -13,3 +13,4 @@ Examples
 - java-pom-loadmodel
 - scala-sbt-helloworld
 - scala-sbt-loadmodel
+- export-in-python-import-in-scala
