@@ -11,3 +11,5 @@ Examples
 
 - java-pom-helloworld
 - java-pom-loadmodel
+- scala-sbt-helloworld
+- scala-sbt-loadmodel
