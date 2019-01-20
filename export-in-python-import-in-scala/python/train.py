@@ -1,6 +1,7 @@
 import os
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.python.framework.graph_util_impl import convert_variables_to_constants
 
 (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
 
@@ -30,18 +31,33 @@ def create_model():
 model = create_model()
 model.summary()
 
+#print(model.graph == tf.get_default_graph())
+
+all_saver = tf.train.Saver()
+
 checkpoint_path = "training_1/cp.ckpt"
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
 # Create checkpoint callback
 cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, 
-                                                 save_weights_only=True,
+                                                 save_weights_only=False,
                                                  verbose=1)
 
 model = create_model()
-saved_model_path = tf.contrib.saved_model.save_keras_model(model, "./withtrain_models")
+saved_model_path = tf.contrib.saved_model.save_keras_model(model, "./untrained_models")
+#all_saver.save(sess, './untrained_models_saver/data')
+outputs = [node.op.name for node in model.outputs]
+session = keras.backend.get_session()
+
+min_graph = convert_variables_to_constants(session, session.graph_def, outputs)
+tf.train.write_graph(min_graph, "./logdir/", "untrained.pb", as_text=False)
 
 model.fit(train_images, train_labels,  epochs = 10, 
           validation_data = (test_images,test_labels),
           callbacks = [cp_callback])  # pass callback to training
 saved_model_path = tf.contrib.saved_model.save_keras_model(model, "./trained_models")
+
+#all_saver.save(sess, './trained_models_saver/data')
+
+min_graph = convert_variables_to_constants(session, session.graph_def, outputs)
+tf.train.write_graph(min_graph, "./logdir/", "trained.pb", as_text=False)
