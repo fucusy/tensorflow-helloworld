@@ -6,17 +6,17 @@ import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.Arrays
 import java.util.List
+
 import org.tensorflow.DataType
 import org.tensorflow.Graph
 import org.tensorflow.Output
-import org.tensorflow.Session 
-import org.tensorflow.Tensor 
-import org.tensorflow.TensorFlow 
-import org.tensorflow.types.UInt8 
-
+import org.tensorflow.Session
+import org.tensorflow.Tensor
+import org.tensorflow.TensorFlow
+import org.tensorflow.types.UInt8
 import java.lang.Float
+import java.util
 
 class GraphBuilder(private var g: Graph) {
 
@@ -50,45 +50,48 @@ class GraphBuilder(private var g: Graph) {
 
   def constant[T](name: String, value: AnyRef, `type`: Class[T]): Output[T] = {
     val t = Tensor.create[T](value, `type`)
-	g.opBuilder("Const", name)
-        .setAttr("dtype", DataType.fromClass(`type`))
-        .setAttr("value", t)
-        .build()
-        .output[T](0)
-  }
-  def constant[T](name: String, value: Array[Byte], `type`: Class[T]): Output[T] = {
-    val t = Tensor.create[T](value, `type`)
-	g.opBuilder("Const", name)
-        .setAttr("dtype", DataType.fromClass(`type`))
-        .setAttr("value", t)
-        .build()
-        .output[T](0)
-  }
-  def constant[T](name: String, value: Int, `type`: Class[T]): Output[T] = {
-    val t = Tensor.create[T](value, `type`)
-	g.opBuilder("Const", name)
-        .setAttr("dtype", DataType.fromClass(`type`))
-        .setAttr("value", t)
-        .build()
-        .output[T](0)
-  }
-  def constant[T](name: String, value: Array[Int], `type`: Class[T]): Output[T] = {
-    val t = Tensor.create[T](value, `type`)
-	g.opBuilder("Const", name)
-        .setAttr("dtype", DataType.fromClass(`type`))
-        .setAttr("value", t)
-        .build()
-        .output[T](0)
-  }
-  def constant[T](name: String, value: Float, `type`: Class[T]): Output[T] = {
-    val t = Tensor.create[T](value, `type`)
-	g.opBuilder("Const", name)
-        .setAttr("dtype", DataType.fromClass(`type`))
-        .setAttr("value", t)
-        .build()
-        .output[T](0)
+    g.opBuilder("Const", name)
+      .setAttr("dtype", DataType.fromClass(`type`))
+      .setAttr("value", t)
+      .build()
+      .output[T](0)
   }
 
+  def constant[T](name: String, value: Array[Byte], `type`: Class[T]): Output[T] = {
+    val t = Tensor.create[T](value, `type`)
+    g.opBuilder("Const", name)
+      .setAttr("dtype", DataType.fromClass(`type`))
+      .setAttr("value", t)
+      .build()
+      .output[T](0)
+  }
+
+  def constant[T](name: String, value: Int, `type`: Class[T]): Output[T] = {
+    val t = Tensor.create[T](value, `type`)
+    g.opBuilder("Const", name)
+      .setAttr("dtype", DataType.fromClass(`type`))
+      .setAttr("value", t)
+      .build()
+      .output[T](0)
+  }
+
+  def constant[T](name: String, value: Array[Int], `type`: Class[T]): Output[T] = {
+    val t = Tensor.create[T](value, `type`)
+    g.opBuilder("Const", name)
+      .setAttr("dtype", DataType.fromClass(`type`))
+      .setAttr("value", t)
+      .build()
+      .output[T](0)
+  }
+
+  def constant[T](name: String, value: Float, `type`: Class[T]): Output[T] = {
+    val t = Tensor.create[T](value, `type`)
+    g.opBuilder("Const", name)
+      .setAttr("dtype", DataType.fromClass(`type`))
+      .setAttr("value", t)
+      .build()
+      .output[T](0)
+  }
 
   def constant(name: String, value: Array[Byte]): Output[String] =
     this.constant(name, value, classOf[String])
@@ -119,11 +122,10 @@ class GraphBuilder(private var g: Graph) {
       .addInput(in2)
       .build()
       .output[T](0)
-
 }
 
 object Hello extends App {
-private def printUsage(s: PrintStream): Unit = {
+  private def printUsage(s: PrintStream): Unit = {
     val url: String =
       "https://storage.googleapis.com/download.tensorflow.org/models/inception5h.zip"
     s.println(
@@ -139,96 +141,90 @@ private def printUsage(s: PrintStream): Unit = {
     s.println("            (from " + url + ")")
     s.println("<image file> is the path to a JPEG image file")
   }
-private def constructAndExecuteGraphToNormalizeImage(
-      imageBytes: Array[Byte]): Tensor[Float] =
-     {
- 	val g = new Graph()
-      val b: GraphBuilder = new GraphBuilder(g)
-//   float using (value - Mean)/Scale.
-      val H: Int = 224
-      val W: Int = 224
-      val mean: Float = 117f
-      val scale: Float = 1f
-// have been more appropriate.
-      val input: Output[String] = b.constant("input", imageBytes)
-      val output: Output[Float] = b.div(
-        b.sub(
-          b.resizeBilinear(
-            b.expandDims(b.cast(b.decodeJpeg(input, 3), classOf[Float]),
-                         b.constant("make_batch", 0)),
-            b.constant("size", Array(H, W))),
-          b.constant("mean", mean)
-        ),
-        b.constant("scale", scale)
-      )
-	val s  = new Session(g) // Generally, there may be multiple output tensors, all of them must be closed to prevent resource leaks.
-	s.runner()
-          .fetch(output.op().name())
-          .run()
-          .get(0)
-          .expect(classOf[Float])
-    }
 
-private def executeInceptionGraph(graphDef: Array[Byte],
-                                    image: Tensor[Float]): Array[Float] = {
-    val g = new Graph() 
-	g.importGraphDef(graphDef)
-    val s = new Session(g)
-	val result  = 
-          s.runner()
-            .feed("input", image)
-            .fetch("output")
-            .run()
-            .get(0)
-            .expect(classOf[Float])
-	val rshape: Array[Long] = result.shape()
-	if (result.numDimensions() != 2 || rshape(0) != 1) {
-          throw new RuntimeException(
-            String.format(
-              "Expected model to produce a [1 N] shaped tensor where N is the number of labels, instead it produced one with shape %s",
-              Arrays.toString(rshape)))
-        }
-        val nlabels: Int = rshape(1).toInt
-        result.copyTo(Array.ofDim[Float](1, nlabels))(0)
-      }
-    
-private def maxIndex(probabilities: Array[Float]): Int = {
-    var best: Int = 0
-    for (i <- 1 until probabilities.length
-         if probabilities(i) > probabilities(best)) {
-      best = i
-    }
-    best
+  private def constructAndExecuteGraphToNormalizeImage(
+                                                        imageBytes: Array[Byte]): Tensor[Float] = {
+    val g = new Graph()
+    val b: GraphBuilder = new GraphBuilder(g)
+    //   float using (value - Mean)/Scale.
+    val H: Int = 224
+    val W: Int = 224
+    val mean: Float = 117f
+    val scale: Float = 1f
+    // have been more appropriate.
+    val input: Output[String] = b.constant("input", imageBytes)
+    val output: Output[Float] = b.div(
+      b.sub(
+        b.resizeBilinear(
+          b.expandDims(b.cast(b.decodeJpeg(input, 3), classOf[Float]),
+            b.constant("make_batch", 0)),
+          b.constant("size", Array(H, W))),
+        b.constant("mean", mean)
+      ),
+      b.constant("scale", scale)
+    )
+    val s = new Session(g) // Generally, there may be multiple output tensors, all of them must be closed to prevent resource leaks.
+    s.runner()
+      .fetch(output.op().name())
+      .run()
+      .get(0)
+      .expect(classOf[Float])
   }
+
+  private def executeInceptionGraph(graphDef: Array[Byte],
+                                    image: Tensor[Float]): Array[scala.Float] = {
+    val g = new Graph()
+    g.importGraphDef(graphDef)
+    val s = new Session(g)
+    val result =
+      s.runner()
+        .feed("input", image)
+        .fetch("output")
+        .run()
+        .get(0)
+        .expect(classOf[Float])
+    val rshape: Array[Long] = result.shape()
+    if (result.numDimensions() != 2 || rshape(0) != 1) {
+      throw new RuntimeException(
+        String.format(
+          "Expected model to produce a [1 N] shaped tensor where N is the number of labels, instead it produced one with shape %s",
+          util.Arrays.toString(rshape)))
+    }
+    val nlabels: Int = rshape(1).toInt
+    var res = Array.ofDim[scala.Float](1, nlabels)
+    result.copyTo(res)(0)
+  }
+
+  private def maxIndex(probabilities: Array[scala.Float]): Int = {
+    probabilities.zipWithIndex.maxBy(_._1)._2
+  }
+
   private def readAllBytesOrExit(path: Path): Array[Byte] = {
-    try{
-		return Files.readAllBytes(path)
-	}
+    try {
+      return Files.readAllBytes(path)
+    }
     catch {
-      case e: IOException => {
+      case e: IOException =>
         System.err.println("Failed to read [" + path + "]: " + e.getMessage)
         System.exit(1)
-      }
-
     }
     null
   }
 
-  private def readAllLinesOrExit(path: Path): List[String] = {
-    try Files.readAllLines(path, Charset.forName("UTF-8"))
+  private def readAllLinesOrExit(path: Path): util.List[String] = {
+    try {
+      return Files.readAllLines(path, Charset.forName("UTF-8"))
+    }
     catch {
-      case e: IOException => {
+      case e: IOException =>
         System.err.println("Failed to read [" + path + "]: " + e.getMessage)
         System.exit(0)
-      }
-
     }
     null
   }
 
 
- override def main(args: Array[String]): Unit = {
-
+  override def main(args: Array[String]): Unit = {
     if (args.length != 2) {
       printUsage(System.err)
       System.exit(1)
@@ -237,19 +233,15 @@ private def maxIndex(probabilities: Array[Float]): Int = {
     val imageFile: String = args(1)
     val graphDef: Array[Byte] = readAllBytesOrExit(
       Paths.get(modelDir, "tensorflow_inception_graph.pb"))
-    val labels: List[String] = readAllLinesOrExit(
+    val labels: util.List[String] = readAllLinesOrExit(
       Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"))
     val imageBytes: Array[Byte] = readAllBytesOrExit(Paths.get(imageFile))
     val image = constructAndExecuteGraphToNormalizeImage(imageBytes)
-	val labelProbabilities: Array[Float] =
-        executeInceptionGraph(graphDef, image)
-	val bestLabelIdx: Int = maxIndex(labelProbabilities)
-	println("BEST MATCH: %s (%.2f%% likely)".format(
-	  labels.get(bestLabelIdx),
-	  labelProbabilities(bestLabelIdx) * 100f))
+    val labelProbabilities: Array[scala.Float] =
+      executeInceptionGraph(graphDef, image)
+    val bestLabelIdx: Int = maxIndex(labelProbabilities)
+    println("BEST MATCH: %s (%.2f%% likely)".format(
+      labels.get(bestLabelIdx),
+      labelProbabilities(bestLabelIdx) * 100f))
   }
-
 }
-
-
-
