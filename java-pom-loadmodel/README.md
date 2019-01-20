@@ -1,3 +1,6 @@
+Introduction
+=====
+These code are modified from `https://github.com/tensorflow/tensorflow/blob/de72c8ccce/tensorflow/java/src/main/java/org/tensorflow/examples/LabelImage.java`
 
 Env
 =====
