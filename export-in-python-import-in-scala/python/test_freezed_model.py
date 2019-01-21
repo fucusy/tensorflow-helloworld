@@ -1,5 +1,6 @@
 import argparse 
 import tensorflow as tf
+import numpy as np
 
 
 def load_graph(frozen_graph_filename):
@@ -42,8 +43,10 @@ if __name__ == '__main__':
         # Note: we don't nee to initialize/restore anything
         # There is no Variables in this graph, only hardcoded constants 
         y_out = sess.run(y, feed_dict={
-            x: [range(28*28)] # < 45
+            x: test_images # < 45
         })
         # I taught a neural net to recognise when a sum of numbers is bigger than 45
         # it should return False in this case
-        print(y_out) # [[ False ]] Yay, it works!
+        y_label = np.argmax(y_out, axis=1)
+        acc = np.sum(y_label==test_labels) * 1.0 / test_labels.shape[0]
+        print("{} model, accuracy: {:5.2f}%".format(args.frozen_model_filename, 100*acc))
