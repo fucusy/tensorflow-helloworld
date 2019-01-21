@@ -1,6 +1,15 @@
 Introduction
 =====
-These code are modified from `https://github.com/tensorflow/tensorflow/blob/de72c8ccce/tensorflow/java/src/main/java/org/tensorflow/examples/LabelImage.java`
+
+This tiny project show that we can training model with tensorflow in python,
+leverage tons of python library to speed up the training process, then
+we can export the trained model into .pb file, and server it in scala/java program
+
+References
+=====
+1. https://blog.metaflow.fr/tensorflow-how-to-freeze-a-model-and-serve-it-with-a-python-api-d4f3596b3adc
+2. https://github.com/tensorflow/tensorflow/blob/de72c8ccce/tensorflow/java/src/main/java/org/tensorflow/examples/LabelImage.java
+3. https://blog.metaflow.fr/tensorflow-saving-restoring-and-mixing-multiple-models-c4c94d5d7125
 
 Pre-request
 =====
