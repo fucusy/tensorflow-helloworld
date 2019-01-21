@@ -1,9 +1,9 @@
 Introduction
 =====
 
-This tiny project show that we can training model with tensorflow in python,
+This tiny project shows that we can train model with tensorflow in python,
 leverage tons of python library to speed up the training process, then
-we can export the trained model into .pb file, and server it in scala/java program
+export the trained model into .pb file, and server it in scala program
 
 References
 =====
